@@ -1,0 +1,255 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order {{ status_title }} - Krushi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background: #3b82f6;
+            /* Fallback color */
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #3b82f6;
+            /* Fallback color */
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .order-info {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .order-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .order-info b {
+            color: #1e293b;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .items-table th {
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 10px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .items-table td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 15px;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .item-quantity {
+            color: #64748b;
+        }
+
+        .total-section {
+            border-top: 2px solid #e2e8f0;
+            padding-top: 20px;
+            text-align: right;
+        }
+
+        .total-row {
+            margin-bottom: 10px;
+        }
+
+        .total-label {
+            font-size: 16px;
+            color: #64748b;
+            margin-right: 20px;
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .address-box {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3b82f6;
+            /* Fallback */
+        }
+
+        .address-box h3 {
+            margin-top: 0;
+            font-size: 16px;
+            color: #1e293b;
+        }
+
+        .footer {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 30px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #3b82f6;
+            /* Fallback */
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        {% with "background-color: "|add:status_color as dynamic_bg %}
+        <div class="header" {{ "style" }}="{{ dynamic_bg }}">
+            <h1>Krushi</h1>
+            <p>Empowering Farmers, Enriching Lives</p>
+        </div>
+        {% endwith %}
+
+        <div class="content">
+            {% with "background-color: "|add:status_color as badge_bg %}
+            <div class="status-badge" {{ "style" }}="{{ badge_bg }}">{{ status_title }}</div>
+            {% endwith %}
+
+            <h2 style="color: #1e293b; margin-top: 0;">Hello, {{ user.first_name|default:user.username }}!</h2>
+            <p>{{ status_message }}</p>
+
+            <div class="order-info">
+                <p>Order Number: <b>#{{ order.order_number }}</b></p>
+                <p>Date: <b>{{ order.created_at|date:"F j, Y" }}</b></p>
+                <p>Payment Method: <b>{{ order.get_payment_method_display }}</b></p>
+            </div>
+
+            <h3 style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Order Summary</h3>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: right;">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>
+                            <div class="item-name">{{ item.product.name }}</div>
+                        </td>
+                        <td style="text-align: center;" class="item-quantity">x{{ item.quantity }}</td>
+                        <td style="text-align: right;">₹{{ item.total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="total-section">
+                <div class="total-row">
+                    <span class="total-label">Total Amount:</span>
+                    {% with "color: "|add:status_color as amount_color %}
+                    <span class="total-amount" {{ "style" }}="{{ amount_color }}">₹{{ order.total_amount }}</span>
+                    {% endwith %}
+                </div>
+            </div>
+
+            {% with "border-left-color: "|add:status_color as border_style %}
+            <div class="address-box" {{ "style" }}="{{ border_style }}">
+                <h3>Shipping Address</h3>
+                <p style="margin-bottom: 0; white-space: pre-line;">{{ order.shipping_address }}</p>
+                <p style="margin-top: 10px; font-weight: 600;">Phone: {{ order.phone }}</p>
+            </div>
+            {% endwith %}
+
+            <div style="text-align: center;">
+                {% with "background-color: "|add:status_color as btn_bg %}
+                <a href="{{ site_url }}/my-orders/" class="btn" {{ "style" }}="{{ btn_bg }}">View Order Details</a>
+                {% endwith %}
+            </div>
+
+            <p style="margin-top: 40px; font-size: 14px; color: #64748b; text-align: center;">
+                If you have any questions, please reply to this email or contact our support team.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 Krushi. All rights reserved.</p>
+            <p>Empowering Indian Farmers with Technology</p>
+        </div>
+    </div>
+</body>
+
+</html>

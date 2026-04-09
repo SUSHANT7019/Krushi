@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Krushi{% endblock %}
+
+{% block content %}
+<!-- Checkout Header -->
+<section class="checkout-header">
+    <div class="container">
+        <h1>Checkout</h1>
+        <p>Complete your purchase</p>
+    </div>
+</section>
+
+<!-- Checkout Content -->
+<section class="checkout-content">
+    <div class="container">
+        <div class="checkout-grid">
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="order-items">
+                    {% for item in cart_items %}
+                    <div class="order-item">
+                        <div class="item-info">
+                            <h4>{{ item.product.name }}</h4>
+                            <p class="item-category">{{ item.product.category.name }}</p>
+                        </div>
+                        <div class="item-quantity">x{{ item.quantity }}</div>
+                        <div class="item-price">₹{{ item.total_price }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-total">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span>₹{{ cart.total_amount }}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Shipping:</span>
+                        <span>Free</span>
+                    </div>
+                    <div class="total-row final-total">
+                        <span>Total:</span>
+                        <span>₹{{ cart.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Form -->
+            <div class="checkout-form">
+                <h3>Shipping Information</h3>
+                <form method="post" id="checkoutForm">
+                    {% csrf_token %}
+
+                    <div class="form-row-custom"
+                        style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 250px;">
+                            <label for="full_name">Full Name *</label>
+                            <input type="text" id="full_name" name="full_name" class="form-control"
+                                placeholder="Enter full name" required>
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 250px;">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" class="form-control"
+                                placeholder="Enter 10-digit phone number" required pattern="\d{10}" maxlength="10"
+                                title="Please enter exactly 10 digits">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shipping_address">Shipping Address Line *</label>
+                        <textarea id="shipping_address" name="shipping_address" class="form-control" rows="2"
+                            placeholder="Street address, building name, area etc." required></textarea>
+                    </div>
+
+                    <div class="form-row-custom"
+                        style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" name="city" class="form-control" placeholder="City" required>
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label for="district">District *</label>
+                            <select id="district" name="district" class="form-control" required>
+                                <option value="">Select District</option>
+                                <option value="Ahilyanagar">Ahilyanagar</option>
+                                <option value="Akola">Akola</option>
+                                <option value="Amravati">Amravati</option>
+                                <option value="Beed">Beed</option>
+                                <option value="Bhandara">Bhandara</option>
+                                <option value="Buldhana">Buldhana</option>
+                                <option value="Chandrapur">Chandrapur</option>
+                                <option value="Chhatrapati Sambhaji Nagar">Chhatrapati Sambhaji Nagar</option>
+                                <option value="Dharashiv">Dharashiv</option>
+                                <option value="Dhule">Dhule</option>
+                                <option value="Gadchiroli">Gadchiroli</option>
+                                <option value="Gondia">Gondia</option>
+                                <option value="Hingoli">Hingoli</option>
+                                <option value="Jalgaon">Jalgaon</option>
+                                <option value="Jalna">Jalna</option>
+                                <option value="Kolhapur">Kolhapur</option>
+                                <option value="Latur">Latur</option>
+                                <option value="Mumbai City">Mumbai City</option>
+                                <option value="Mumbai Suburban">Mumbai Suburban</option>
+                                <option value="Nagpur">Nagpur</option>
+                                <option value="Nanded">Nanded</option>
+                                <option value="Nandurbar">Nandurbar</option>
+                                <option value="Nashik">Nashik</option>
+                                <option value="Palghar">Palghar</option>
+                                <option value="Parbhani">Parbhani</option>
+                                <option value="Pune">Pune</option>
+                                <option value="Raigad">Raigad</option>
+                                <option value="Ratnagiri">Ratnagiri</option>
+                                <option value="Sangli">Sangli</option>
+                                <option value="Satara">Satara</option>
+                                <option value="Sindhudurg">Sindhudurg</option>
+                                <option value="Solapur">Solapur</option>
+                                <option value="Thane">Thane</option>
+                                <option value="Wardha">Wardha</option>
+                                <option value="Washim">Washim</option>
+                                <option value="Yavatmal">Yavatmal</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row-custom"
+                        style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label for="state">State *</label>
+                            <select id="state" name="state" class="form-control" required>
+                                <option value="">Select State</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                <option value="Assam">Assam</option>
+                                <option value="Bihar">Bihar</option>
+                                <option value="Chhattisgarh">Chhattisgarh</option>
+                                <option value="Goa">Goa</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                <option value="Jharkhand">Jharkhand</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                <option value="Manipur">Manipur</option>
+                                <option value="Meghalaya">Meghalaya</option>
+                                <option value="Mizoram">Mizoram</option>
+                                <option value="Nagaland">Nagaland</option>
+                                <option value="Odisha">Odisha</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Sikkim">Sikkim</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Tripura">Tripura</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Uttarakhand">Uttarakhand</option>
+                                <option value="West Bengal">West Bengal</option>
+                                <option value="Delhi">Delhi</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 150px;">
+                            <label for="pincode">Pincode *</label>
+                            <input type="text" id="pincode" name="pincode" class="form-control"
+                                placeholder="6-digit PIN" required pattern="\d{6}" maxlength="6">
+                        </div>
+                    </div>
+
+                    <div id="stateWarning" class="alert alert-danger"
+                        style="display:none; margin-bottom:1.25rem; padding:1rem; border-radius:10px; background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; font-size:0.95rem; align-items: center; gap: 8px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Sorry, delivery is available only within Maharashtra.</strong>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Order Notes (Optional)</label>
+                        <textarea id="notes" name="notes" class="form-control" rows="2"
+                            placeholder="Any special instructions for delivery"></textarea>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="form-group" id="paymentMethodSection">
+                        <label style="font-weight:600; font-size:1.05rem; margin-bottom:0.75rem; display:block;">
+                            <i class="fas fa-credit-card" style="margin-right:6px; color:#0f766e;"></i>
+                            Payment Method
+                        </label>
+                        <div class="payment-methods" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <!-- Razorpay Option -->
+                            <label class="payment-option" for="pm_razorpay" id="label_razorpay"
+                                style="display:flex; align-items:center; gap:0.75rem; padding:1rem 1.25rem; border:2px solid #0f766e; border-radius:10px; cursor:pointer; background:#f0fdf4; transition:all 0.2s;">
+                                <input type="radio" id="pm_razorpay" name="payment_method" value="razorpay" checked
+                                    style="accent-color:#0f766e; width:18px; height:18px;">
+                                <div>
+                                    <span style="font-weight:600; font-size:1rem; color:#0f766e;">💳 Pay Online
+                                        (Razorpay)</span>
+                                    <span style="display:block; font-size:0.82rem; color:#666; margin-top:2px;">UPI,
+                                        Cards, Net Banking, Wallets</span>
+                                </div>
+                            </label>
+
+                            <!-- COD Option -->
+                            {% if cod_enabled %}
+                            {% if cod_available %}
+                            <label class="payment-option" for="pm_cod" id="label_cod"
+                                style="display:flex; align-items:center; gap:0.75rem; padding:1rem 1.25rem; border:2px solid #ddd; border-radius:10px; cursor:pointer; background:#fff; transition:all 0.2s;">
+                                <input type="radio" id="pm_cod" name="payment_method" value="cod"
+                                    style="accent-color:#0f766e; width:18px; height:18px;">
+                                <div>
+                                    <span style="font-weight:600; font-size:1rem; color:#333;">🏠 Cash on
+                                        Delivery</span>
+                                    <span style="display:block; font-size:0.82rem; color:#666; margin-top:2px;">Pay when
+                                        your order is delivered</span>
+                                </div>
+                            </label>
+                            {% else %}
+                            <label class="payment-option disabled" for="pm_cod" id="label_cod"
+                                style="display:flex; align-items:center; gap:0.75rem; padding:1rem 1.25rem; border:2px solid #ddd; border-radius:10px; cursor:not-allowed; background:#fff; transition:all 0.2s; opacity:0.55;">
+                                <input type="radio" id="pm_cod" name="payment_method" value="cod" disabled
+                                    style="accent-color:#0f766e; width:18px; height:18px;">
+                                <div>
+                                    <span style="font-weight:600; font-size:1rem; color:#333;">🏠 Cash on
+                                        Delivery</span>
+                                    <span style="display:block; font-size:0.82rem; color:#dc2626; margin-top:2px;">
+                                        Not available for orders above ₹{{ cod_max_amount }}
+                                    </span>
+                                </div>
+                            </label>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary checkout-btn" id="payBtn"
+                        style="width: 100%; padding: 0.85rem; font-size: 1.1rem; font-weight: 600;">
+                        <i class="fas fa-lock"></i> Pay Now — ₹{{ cart.total_amount }}
+                    </button>
+                    <div id="paymentLoader" style="display:none; text-align:center; margin-top:1rem;">
+                        <i class="fas fa-spinner fa-spin" style="font-size:24px; color:#0f766e;"></i>
+                        <p style="margin-top:0.5rem; color:#555;">Processing your order, please wait…</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    (function () {
+        const form = document.getElementById('checkoutForm');
+        const payBtn = document.getElementById('payBtn');
+        const loader = document.getElementById('paymentLoader');
+        const stateSelect = document.getElementById('state');
+        const stateWarning = document.getElementById('stateWarning');
+        const phoneInput = document.getElementById('phone');
+        const pincodeInput = document.getElementById('pincode');
+        const cartTotal = '{{ cart.total_amount }}';
+        let processing = false;
+
+        // Prevent non-numeric characters in numeric inputs
+        [phoneInput, pincodeInput].forEach(el => {
+            el.addEventListener('input', function (e) {
+                this.value = this.value.replace(/\D/g, '');
+            });
+        });
+
+        // Generate unique idempotency key per page load
+        const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+
+        // ── State Restriction Logic ──
+        function validateState() {
+            const selectedState = stateSelect.value;
+            if (selectedState && selectedState.toLowerCase() !== 'maharashtra') {
+                stateWarning.style.display = 'flex';
+                payBtn.disabled = true;
+                payBtn.style.opacity = '0.5';
+                payBtn.style.cursor = 'not-allowed';
+            } else {
+                stateWarning.style.display = 'none';
+                if (!processing) {
+                    payBtn.disabled = false;
+                    payBtn.style.opacity = '1';
+                    payBtn.style.cursor = 'pointer';
+                }
+            }
+        }
+
+        stateSelect.addEventListener('change', validateState);
+        // Run on load
+        validateState();
+
+        // ── Dynamic button text based on payment method ──
+        const pmRadios = document.querySelectorAll('input[name="payment_method"]');
+        pmRadios.forEach(function (radio) {
+            radio.addEventListener('change', updatePayBtn);
+        });
+
+        function updatePayBtn() {
+            const selected = document.querySelector('input[name="payment_method"]:checked');
+            if (!selected) return;
+
+            // Visual highlight for selected option
+            document.querySelectorAll('.payment-option').forEach(function (el) {
+                if (!el.classList.contains('disabled')) {
+                    el.style.borderColor = '#ddd';
+                    el.style.background = '#fff';
+                }
+            });
+            const activeLabel = selected.closest('.payment-option');
+            if (activeLabel && !activeLabel.classList.contains('disabled')) {
+                activeLabel.style.borderColor = '#0f766e';
+                activeLabel.style.background = '#f0fdf4';
+            }
+
+            if (selected.value === 'cod') {
+                payBtn.innerHTML = '<i class="fas fa-box"></i> Place COD Order — ₹' + cartTotal;
+            } else {
+                payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay Now — ₹' + cartTotal;
+            }
+        }
+        updatePayBtn();
+
+        // ── Form submission ──
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            if (processing) return;
+
+            // Re-validate state on submit
+            const state = stateSelect.value;
+            if (!state || state.toLowerCase() !== 'maharashtra') {
+                alert('Sorry, delivery is available only within Maharashtra.');
+                return;
+            }
+
+            // Validate phone number length
+            const phone = phoneInput.value.trim();
+            if (phone.length !== 10) {
+                alert('Please enter a valid 10-digit phone number.');
+                return;
+            }
+
+            // Validate pincode length
+            const pincode = pincodeInput.value.trim();
+            if (pincode.length !== 6) {
+                alert('Please enter a valid 6-digit pincode.');
+                return;
+            }
+
+            processing = true;
+            payBtn.disabled = true;
+            payBtn.style.opacity = '0.6';
+            loader.style.display = 'block';
+
+            const selectedPM = (document.querySelector('input[name="payment_method"]:checked') || {}).value || 'razorpay';
+
+            // Gather form data
+            const fd = new URLSearchParams();
+            fd.append('full_name', document.getElementById('full_name').value.trim());
+            fd.append('phone', document.getElementById('phone').value.trim());
+            fd.append('shipping_address', document.getElementById('shipping_address').value.trim());
+            fd.append('city', document.getElementById('city').value.trim());
+            fd.append('district', document.getElementById('district').value.trim());
+            fd.append('state', state);
+            fd.append('pincode', document.getElementById('pincode').value.trim());
+            fd.append('notes', document.getElementById('notes').value.trim());
+            fd.append('payment_method', selectedPM);
+            fd.append('idempotency_key', idempotencyKey);
+
+            // Step 1: Create order on backend
+            let initData;
+            try {
+                const init = await fetch('{% url "checkout" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCSRFToken(),
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: fd.toString(),
+                });
+
+                initData = await init.json();
+
+                if (!init.ok || !initData.success) {
+                    alert(initData.message || 'Failed to create order.');
+                    resetBtn();
+                    return;
+                }
+            } catch (err) {
+                alert('Network error while placing order.');
+                resetBtn();
+                return;
+            }
+
+            // Step 2: Branch by payment method
+            if (initData.payment_method === 'cod') {
+                // COD — order already placed, redirect to confirmation
+                window.location.href = '/order-confirmation/' + initData.order_id + '/';
+                return;
+            }
+
+            // Razorpay flow
+            const options = {
+                key: initData.key_id,
+                amount: initData.amount,
+                currency: initData.currency,
+                name: 'Krushi',
+                description: 'Order #' + initData.order_number,
+                order_id: initData.razorpay_order_id,
+                prefill: initData.user || {},
+                theme: { color: '#0f766e' },
+
+                handler: async function (response) {
+                    loader.style.display = 'block';
+                    payBtn.textContent = 'Verifying payment…';
+
+                    const verifyFD = new URLSearchParams();
+                    verifyFD.append('razorpay_payment_id', response.razorpay_payment_id);
+                    verifyFD.append('razorpay_order_id', response.razorpay_order_id);
+                    verifyFD.append('razorpay_signature', response.razorpay_signature);
+
+                    try {
+                        const vr = await fetch('{% url "payment_verify" %}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCSRFToken(),
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: verifyFD.toString(),
+                        });
+                        const vrData = await vr.json();
+
+                        if (vr.ok && vrData.success) {
+                            window.location.href = '/order-confirmation/' + vrData.order_id + '/';
+                        } else {
+                            alert('Payment verification failed: ' + (vrData.message || 'Unknown error'));
+                            resetBtn();
+                        }
+                    } catch (err) {
+                        alert('Network error during payment verification. Check My Orders.');
+                        resetBtn();
+                    }
+                },
+
+                modal: {
+                    ondismiss: function () {
+                        resetBtn();
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+
+            rzp.on('payment.failed', function (response) {
+                alert('Payment failed: ' + (response.error.description || response.error.reason));
+                resetBtn();
+            });
+
+            rzp.open();
+        });
+
+        function resetBtn() {
+            processing = false;
+            loader.style.display = 'none';
+            validateState(); // Re-checks state and handles button enable/disable
+            updatePayBtn();
+        }
+    })();
+</script>
+{% endblock %}

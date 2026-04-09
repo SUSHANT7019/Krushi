@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Disclaimer - Krushi{% endblock %}
+
+{% block body_class %}page-disclaimer{% endblock %}
+
+{% block content %}
+<section class="hero" style="min-height: 45vh; padding-top: 120px; background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1600&q=80') center center/cover;">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Disclaimer</h1>
+            <p>Transparency regarding the use and limits of our agricultural technology.</p>
+        </div>
+    </div>
+</section>
+
+<section class="legal-section">
+    <div class="container">
+        <div class="legal-header">
+            <p>Last Updated: April 10, 2026</p>
+        </div>
+
+        <div style="max-width: 900px; margin: 0 auto;">
+            <div class="legal-card" style="border-left: 5px solid #d32f2f;">
+                <h2 style="color: #d32f2f;"><i class="fas fa-exclamation-triangle"></i> 1. AI Recommendation Limit</h2>
+                <p>Krushi's AI model detections (Disease & Soil) are <strong>not guarantees</strong>. AI provides estimates based on visual data. We recommend verifying any critical diagnosis with a certified agricultural expert.</p>
+            </div>
+
+            <div class="legal-card" style="border-left: 5px solid #d32f2f;">
+                <h2><i class="fas fa-flask"></i> 2. Product Usage</h2>
+                <p>When using seeds, fertilizers, or pesticides purchased via our platform, always follow the physical label instructions and local safety laws. Krushi is not liable for outcomes from product misuse.</p>
+            </div>
+
+            <div class="legal-card" style="border-left: 5px solid #d32f2f;">
+                <h2><i class="fas fa-external-link-alt"></i> 3. External Resources</h2>
+                <p>Links to government portals or third-party agricultural sites are for convenience. We do not control or take responsibility for the content on those external platforms.</p>
+            </div>
+
+            <div class="legal-card" style="border-left: 5px solid #d32f2f;">
+                <h2><i class="fas fa-chart-line"></i> 4. Outcome Disclaimer</h2>
+                <p>Farming outcomes depend on many factors (weather, effort, soil history). Krushi provides tools to help, but cannot guarantee specific yields or profits.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

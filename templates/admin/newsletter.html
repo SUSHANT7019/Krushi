@@ -1,0 +1,95 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Newsletter Management</h2>
+    <div style="display: flex; gap: 10px;">
+        <button onclick="copyEmails()" class="btn btn-info"><i class="fas fa-copy"></i> Copy All Emails</button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Subscribers List</h3>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Email Address</th>
+                    <th>Subscribed Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in subscribers %}
+                <tr>
+                    <td><strong>{{ sub.email }}</strong></td>
+                    <td>{{ sub.created_at|date:"d M Y, H:i" }}</td>
+                    <td>
+                        <form action="{% url 'admin_newsletter_delete' sub.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" 
+                                    onclick="return confirm('Remove {{ sub.email|escapejs }} from newsletter?')"
+                                    style="padding: 5px 10px;" title="Remove Subscriber">
+                                <i class="fas fa-user-minus"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 30px;">No subscribers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div style="padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: center;">
+        <div style="display: flex; gap: 5px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="btn" style="background-color: var(--secondary-color); color: var(--text-main);">&laquo;</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn" style="background-color: var(--secondary-color); color: var(--text-main);">&lsaquo;</a>
+            {% endif %}
+
+            <span class="btn" style="background-color: var(--primary-color); color: white;">{{ page_obj.number }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn" style="background-color: var(--secondary-color); color: var(--text-main);">&rsaquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn" style="background-color: var(--secondary-color); color: var(--text-main);">&raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function copyEmails() {
+        // Collect emails from the table to avoid template tag issues in JS
+        const emailElements = document.querySelectorAll('tbody tr td:first-child strong');
+        const emails = Array.from(emailElements).map(el => el.textContent.trim());
+        
+        if (emails.length === 0) {
+            alert('No emails to copy.');
+            return;
+        }
+        
+        const emailList = emails.join(', ');
+        navigator.clipboard.writeText(emailList).then(() => {
+            alert('Copied ' + emails.length + ' emails to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            // Fallback for older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = emailList;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+            alert('Copied to clipboard (fallback)!');
+        });
+    }
+</script>
+{% endblock %}

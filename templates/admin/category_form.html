@@ -1,0 +1,38 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="page-title">
+    <h2>{% if category %}Edit Category{% else %}Add New Category{% endif %}</h2>
+    <a href="{% url 'admin_categories' %}" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back to List</a>
+</div>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group mb-3">
+            <label for="name" class="form-label" style="display: block; margin-bottom: 8px; font-weight: 500;">Category Name</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ category.name|default:'' }}" required placeholder="e.g., Seeds">
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="icon" class="form-label" style="display: block; margin-bottom: 8px; font-weight: 500;">FontAwesome Icon Class</label>
+            <input type="text" name="icon" id="icon" class="form-control" value="{{ category.icon|default:'fas fa-tag' }}" placeholder="e.g., fas fa-seedling">
+            <small class="text-muted">Find icons at <a href="https://fontawesome.com/icons" target="_blank">fontawesome.com</a></small>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="description" class="form-label" style="display: block; margin-bottom: 8px; font-weight: 500;">Description</label>
+            <textarea name="description" id="description" class="form-control" rows="4" placeholder="Brief description of this category">{{ category.description|default:'' }}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">
+                <i class="fas fa-save"></i> {% if category %}Update Category{% else %}Create Category{% endif %}
+            </button>
+            {% if category %}
+            <a href="{% url 'admin_categories' %}" class="btn btn-info" style="color: white;">Cancel</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Confirmation - Krushi{% endblock %}
+
+{% block content %}
+<!-- Order Confirmation Header -->
+<section class="order-confirmation-header">
+    <div class="container">
+        <div class="confirmation-icon">
+            {% if order.is_cod %}
+            <i class="fas fa-box" style="color:#f59e0b;"></i>
+            {% else %}
+            <i class="fas fa-check-circle"></i>
+            {% endif %}
+        </div>
+        {% if order.is_cod %}
+        <h1>Order Placed!</h1>
+        <p>Your order has been placed successfully. Please keep the exact amount ready for delivery.</p>
+        {% else %}
+        <h1>Order Confirmed!</h1>
+        <p>Thank you for your purchase. Your order has been successfully placed.</p>
+        {% endif %}
+    </div>
+</section>
+<br>
+<!-- COD Banner -->
+{% if order.is_cod %}
+<section style="padding:0;">
+    <div class="container">
+        <div
+            style="background:linear-gradient(135deg,#fef3c7,#fde68a); border:1px solid #f59e0b; border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1rem;">
+            <i class="fas fa-money-bill-wave" style="font-size:2rem; color:#d97706;"></i>
+            <div>
+                <strong style="font-size:1.05rem; color:#92400e;">Cash on Delivery — ₹{{ order.total_amount }}</strong>
+                <p style="margin:0.25rem 0 0; color:#78350f; font-size:0.9rem;">
+                    Please pay the delivery person <strong>₹{{ order.total_amount }}</strong> when you receive your
+                    order.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Order Details -->
+<section class="order-details">
+    <div class="container">
+        <div class="order-info-card">
+            <h3>Order Information</h3>
+            <div class="order-info-grid">
+                <div class="info-row">
+                    <span class="label">Order Number:</span>
+                    <span class="value">{{ order.order_number }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Order Date:</span>
+                    <span class="value">{{ order.created_at|date:"F j, Y" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Order Status:</span>
+                    <span class="value status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Payment Method:</span>
+                    <span class="value" style="text-transform:capitalize; font-weight:600;">
+                        {% if order.is_cod %}
+                        <i class="fas fa-money-bill-wave" style="color:#d97706; margin-right:4px;"></i> Cash on Delivery
+                        {% else %}
+                        <i class="fas fa-credit-card" style="color:#0f766e; margin-right:4px;"></i> Razorpay (Online)
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Total Amount:</span>
+                    <span class="value">₹{{ order.total_amount }}</span>
+                </div>
+                {% if order.payment_status %}
+                <div class="info-row">
+                    <span class="label">Payment Status:</span>
+                    <span class="value status-{{ order.payment_status }}"
+                        style="text-transform:capitalize; font-weight:600;">
+                        {% if order.is_cod and order.payment_status == 'pending' %}
+                        Pay on Delivery
+                        {% else %}
+                        {{ order.payment_status }}
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                {% if order.razorpay_payment_id %}
+                <div class="info-row">
+                    <span class="label">Payment ID:</span>
+                    <span class="value" style="font-family:monospace; font-size:0.9em;">{{ order.razorpay_payment_id
+                        }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="order-items-card">
+            <h3>Order Items</h3>
+            <div class="order-items">
+                {% for item in order.items.all %}
+                <div class="order-item">
+                    <div class="item-image">
+                        <img src="{{ item.product.get_image_src }}" alt="{{ item.product.name }}">
+                    </div>
+                    <div class="item-details">
+                        <h4>{{ item.product.name }}</h4>
+                        <p class="item-category">{{ item.product.category.name }}</p>
+                        <p class="item-price">₹{{ item.price }} x {{ item.quantity }}</p>
+                    </div>
+                    <div class="item-total">
+                        <strong>₹{{ item.total_price }}</strong>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="shipping-info-card">
+            <h3>Shipping Information</h3>
+            <div class="shipping-info">
+                <div class="info-row">
+                    <span class="label">Customer Name:</span>
+                    <span class="value">{{ order.full_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Address:</span>
+                    <span class="value">{{ order.shipping_address }}, {{ order.city }}, {{ order.district }}, {{ order.state }} - {{ order.pincode }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Phone Number:</span>
+                    <span class="value">{{ order.phone }}</span>
+                </div>
+                {% if order.notes %}
+                <div class="info-row">
+                    <span class="label">Order Notes:</span>
+                    <span class="value">{{ order.notes }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="next-steps">
+            <h3>What's Next?</h3>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h4>Confirmation Email</h4>
+                    <p>You'll receive a confirmation email with your order details shortly.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h4>Order Processing</h4>
+                    <p>We'll start processing your order and update you on the shipping status.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        {% if order.is_cod %}
+                        <i class="fas fa-money-bill-wave"></i>
+                        {% else %}
+                        <i class="fas fa-home"></i>
+                        {% endif %}
+                    </div>
+                    <h4>Delivery</h4>
+                    {% if order.is_cod %}
+                    <p>Pay <strong>₹{{ order.total_amount }}</strong> to the delivery person when your order arrives
+                        (3-5 business days).</p>
+                    {% else %}
+                    <p>Your order will be delivered to the address you provided within 3-5 business days.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'my_orders' %}" class="btn btn-primary">View My Orders</a>
+            <a href="{% url 'shop' %}" class="btn btn-secondary">Continue Shopping</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

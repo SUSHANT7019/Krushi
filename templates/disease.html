@@ -1,0 +1,778 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Disease Detection - Krushi AI{% endblock %}
+{% block body_class %}page-disease{% endblock %}
+{% block extra_css %}
+<style>
+    .disease-page {
+        padding: 120px 0 60px;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 60px;
+        margin-top: 20px;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .header-section h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--dark-color);
+        margin-bottom: 15px;
+    }
+
+    .header-section p {
+        color: #000000;
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 30px;
+        align-items: start;
+    }
+
+    @media (max-width: 992px) {
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Upload Card */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        transition: transform 0.3s ease;
+    }
+
+    .upload-zone {
+        border: 2px dashed #d1d5db;
+        border-radius: 20px;
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        background: rgba(249, 250, 251, 0.5);
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragging {
+        border-color: var(--primary-color);
+        background: var(--light-color);
+        transform: translateY(-2px);
+    }
+
+    .upload-zone i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    .upload-zone p {
+        margin: 5px 0;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    #imagePreview {
+        width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 16px;
+        display: none;
+        margin-top: 10px;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 25px;
+        justify-content: center;
+    }
+
+    .btn-premium {
+        padding: 12px 28px;
+        border-radius: 14px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-analyze {
+        background: var(--primary-color);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-analyze:hover:not(:disabled) {
+        background: var(--dark-color);
+        transform: scale(1.05);
+        box-shadow: var(--shadow);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+        background: #e5e7eb;
+    }
+
+    .btn-premium:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        filter: grayscale(0.5);
+    }
+
+    /* Results Section */
+    .results-placeholder {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6b7280;
+    }
+
+    .analysis-loading {
+        display: none;
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .spinner-orbit {
+        width: 60px;
+        height: 60px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .result-content {
+        display: none;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .health-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 40px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        margin-bottom: 20px;
+    }
+
+    .status-healthy {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-diseased {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-stressed {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-unknown {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .diagnosis-summary {
+        margin-bottom: 30px;
+    }
+
+    .diagnosis-summary h2 {
+        font-size: 2rem;
+        color: #111827;
+        margin-bottom: 5px;
+    }
+
+    .diagnosis-card {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 5px solid var(--primary-color);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .disease-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .disease-item:last-child {
+        border-bottom: none;
+    }
+
+    .confidence-bar {
+        height: 6px;
+        width: 100px;
+        background: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        background: var(--primary-color);
+    }
+
+    .info-section {
+        margin-top: 25px;
+    }
+
+    .info-section h4 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #374151;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+    .chip-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .info-chip {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        color: #475569;
+        transition: all 0.2s;
+    }
+
+    .info-chip:hover {
+        background: #fff;
+        border-color: #10b981;
+        transform: translateY(-2px);
+    }
+
+    /* Steps Section */
+    .steps-section {
+        margin-top: 80px;
+    }
+
+    .step-card {
+        text-align: center;
+        background: transparent;
+    }
+
+    .step-icon {
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        background: white;
+        border-radius: 24px;
+        display: inline-block;
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Print Report Styling */
+    @media print {
+
+        header,
+        footer,
+        .translator,
+        .navbar,
+        .action-group,
+        .steps-section,
+        .header-section,
+        .upload-zone,
+        .btn-premium,
+        .messages-container,
+        #resPlaceholder,
+        #resLoading,
+        .chat-widget,
+        #google_translate_element {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+        }
+
+        .disease-page {
+            padding: 0 !important;
+            background: none !important;
+        }
+
+        .main-grid {
+            display: block !important;
+        }
+
+        .glass-card {
+            background: white !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            backdrop-filter: none !important;
+        }
+
+        .result-content {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        #printHeader {
+            display: block !important;
+        }
+
+        .print-image-container {
+            display: block !important;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #printImage {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .health-badge {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            border: 1px solid #ccc;
+        }
+
+        .confidence-fill {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="disease-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1>Krushi AI Diagnostics</h1>
+            <p>Our advanced neural network identifies over 100 crop diseases and nutrient deficiencies with just a
+                photo.</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Left: Upload Section -->
+            <div class="glass-card">
+                <div class="upload-zone" id="dropZone">
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    <div id="uploadDisplay">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p id="uploadText">Tap here to upload Image </p>
+                        <p style="font-size: 0.85rem; color: #9ca3af;">Supports JPG, JPEG, PNG • Max 5MB</p>
+                    </div>
+                    <img id="imagePreview" alt="Crop Preview">
+                </div>
+
+                <div class="action-group">
+                    <button id="selectAnotherBtn" class="btn-premium btn-secondary" style="display: none;">
+                        <i class="fas fa-redo"></i> Change
+                    </button>
+                    <button id="analyzeBtn" class="btn-premium btn-analyze" disabled>
+                        <i class="fas fa-brain"></i> Start Analysis
+                    </button>
+                </div>
+
+                <div id="errorBox"
+                    style="display:none; margin-top: 20px; padding: 15px; background: #fee2e2; border-radius: 12px; color: #991b1b; font-size: 0.9rem;">
+                    <i class="fas fa-exclamation-circle"></i> <span id="errorMsg"></span>
+                </div>
+            </div>
+
+            <!-- Right: Results Section -->
+            <div class="glass-card" style="min-height: 500px; display: flex; flex-direction: column;">
+                <!-- Initial State -->
+                <div class="results-placeholder" id="resPlaceholder">
+                    <i class="fas fa-microscope"
+                        style="font-size: 3.5rem; color: #e5e7eb; margin-bottom: 20px; display: block;"></i>
+                    <h3>Ready for Analysis</h3>
+                    <p>Upload a clear photo of the plant leaves or affected area to begin.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div class="analysis-loading" id="resLoading">
+                    <div class="spinner-orbit"></div>
+                    <h3>Exploring Fibers...</h3>
+                    <p>Our AI is cross-referencing your image with our global database of diseases.</p>
+                </div>
+
+                <!-- Results Content -->
+                <div class="result-content" id="resContent">
+                    <!-- Print Header (Hidden on screen) -->
+                    <div id="printHeader" style="display: none; border-bottom: 3px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 25px; text-align: center;">
+                        <h1 style="color: var(--dark-color); margin:0;">Krushi AI Diagnostics Report</h1>
+                        <p style="color: #666; margin: 5px 0 0;">Date: <span id="printDate"></span></p>
+                    </div>
+
+                    <!-- Analyzed Image (Visible in print) -->
+                    <div class="print-image-container" style="display: none;">
+                        <img id="printImage" src="" alt="Sample Image">
+                        <p style="font-size: 0.8rem; color: #999; margin-top: 5px;">Sample analyzed by Krushi AI System</p>
+                    </div>
+
+                    <div class="health-badge" id="healthBadge"></div>
+
+                    <div class="diagnosis-summary">
+                        <p
+                            style="color: #6b7280; margin: 0; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; font-weight: 700;">
+                            Identified Species</p>
+                        <h2 id="speciesName">--</h2>
+                    </div>
+
+                    <div id="diseaseList" class="info-section">
+                        <h4><i class="fas fa-bacteria"></i> Detected Issues</h4>
+                        <div id="diseaseItems"></div>
+                    </div>
+
+                    <div id="pestsList" class="info-section">
+                        <h4><i class="fas fa-bug"></i> Pests Found</h4>
+                        <div id="pestsItems"></div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4><i class="fas fa-lightbulb"></i> Expert Care Tips</h4>
+                        <div id="tipsContainer" class="chip-container"></div>
+                    </div>
+
+                    <div class="info-section">
+                        <h4><i class="fas fa-vial"></i> Treatment Recommendations</h4>
+                        <div id="fertContainer" class="chip-container"></div>
+                    </div>
+
+                    <div style="margin-top: 40px;">
+                        <button class="btn-premium btn-secondary" onclick="window.print()"
+                            style="width: 100%; justify-content: center;">
+                            <i class="fas fa-download"></i> Save Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="steps-section">
+            <h3 style="text-align: center; margin-bottom: 40px;">How It Works</h3>
+            <div class="main-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-camera"></i></div>
+                    <h4>1. Upload Image</h4>
+                    <p>Upload the photo of the plant part showing symptoms. Natural lighting is best.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-magic"></i></div>
+                    <h4>2. Process</h4>
+                    <p>Our AI analyzes color patterns, textures, and morphology to find deviations.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fas fa-file-medical"></i></div>
+                    <h4>3. Recover</h4>
+                    <p>Get immediate organic and chemical solutions to help your crops thrive.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropZone = document.getElementById('dropZone');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const uploadDisplay = document.getElementById('uploadDisplay');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const selectAnotherBtn = document.getElementById('selectAnotherBtn');
+
+        const resPlaceholder = document.getElementById('resPlaceholder');
+        const resLoading = document.getElementById('resLoading');
+        const resContent = document.getElementById('resContent');
+        const errorBox = document.getElementById('errorBox');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Handle Click to Upload
+        dropZone.addEventListener('click', () => {
+            if (analyzeBtn.disabled === false || !imageInput.files[0]) {
+                imageInput.click();
+            }
+        });
+
+        // Handle File Selection
+        imageInput.addEventListener('change', function (e) {
+            handleFiles(this.files);
+        });
+
+        // Drag and Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragging');
+        });
+
+        ['dragleave', 'drop'].forEach(evt => {
+            dropZone.addEventListener(evt, () => dropZone.classList.remove('dragging'));
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const dt = e.dataTransfer;
+            handleFiles(dt.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                if (!file.type.startsWith('image/')) {
+                    showError("Please upload an image file.");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    uploadDisplay.style.display = 'none';
+                    analyzeBtn.disabled = false;
+                    selectAnotherBtn.style.display = 'flex';
+                    hideError();
+
+                    // Reset results view
+                    resPlaceholder.style.display = 'block';
+                    resContent.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        selectAnotherBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            imageInput.click();
+        });
+
+        // AI Analysis
+        analyzeBtn.addEventListener('click', async function () {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            // Block UI
+            setLoading(true);
+            hideError();
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch("{% url 'analyze_disease' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Server error occurred");
+                }
+
+                displayResults(data);
+            } catch (err) {
+                showError(err.message);
+                resPlaceholder.style.display = 'block';
+                resContent.style.display = 'none';
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                resPlaceholder.style.display = 'none';
+                resContent.style.display = 'none';
+                resLoading.style.display = 'block';
+
+                analyzeBtn.disabled = true;
+                selectAnotherBtn.disabled = true;
+                analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            } else {
+                resLoading.style.display = 'none';
+                analyzeBtn.disabled = false;
+                selectAnotherBtn.disabled = false;
+                analyzeBtn.innerHTML = '<i class="fas fa-brain"></i> Start Analysis';
+            }
+        }
+
+        function displayResults(data) {
+            // Update current date for print
+            document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-IN', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            // Sync image to print container
+            const printImg = document.getElementById('printImage');
+            const mainImg = document.getElementById('imagePreview');
+            printImg.src = mainImg.src;
+
+            // Species
+            document.getElementById('speciesName').textContent = data.species || "Unidentified Plant";
+
+            // Status Badge
+            const badge = document.getElementById('healthBadge');
+            const status = (data.health_status || 'Unknown').toLowerCase();
+            badge.className = 'health-badge status-' + status;
+
+            let statusIcon = 'leaf';
+            if (status === 'healthy') statusIcon = 'check-circle';
+            else if (status === 'diseased') statusIcon = 'exclamation-triangle';
+            else if (status === 'stressed') statusIcon = 'tint-slash';
+
+            badge.innerHTML = `<i class="fas fa-${statusIcon}"></i> ${data.health_status}`;
+
+            // Diseases
+            const diseaseItems = document.getElementById('diseaseItems');
+            const diseaseList = document.getElementById('diseaseList');
+            diseaseItems.innerHTML = '';
+
+            if (data.detected_diseases && data.detected_diseases.length > 0) {
+                diseaseList.style.display = 'block';
+                data.detected_diseases.forEach(d => {
+                    const conf = Math.round((d.confidence || 0) * 100);
+                    diseaseItems.innerHTML += `
+                        <div class="disease-item">
+                            <div>
+                                <strong style="color: #991b1b;">${d.name}</strong>
+                                <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">${d.description || ""}</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="confidence-bar"><div class="confidence-fill" style="width: ${conf}%"></div></div>
+                                <span style="font-size: 0.75rem; font-weight: 700;">${conf}% Match</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                diseaseList.style.display = 'none';
+            }
+
+            // Pests
+            const pestsItems = document.getElementById('pestsItems');
+            const pestsList = document.getElementById('pestsList');
+            pestsItems.innerHTML = '';
+            if (data.pests && data.pests.length > 0) {
+                pestsList.style.display = 'block';
+                data.pests.forEach(p => {
+                    pestsItems.innerHTML += `
+                        <div class="disease-item">
+                            <span><i class="fas fa-caret-right"></i> ${p.name}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                pestsList.style.display = 'none';
+            }
+
+            // Chips
+            renderChips('tipsContainer', data.care_tips);
+            renderChips('fertContainer', data.fertilizer_recommendations);
+
+            resContent.style.display = 'block';
+        }
+
+        function renderChips(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (items && items.length > 0) {
+                items.forEach(item => {
+                    container.innerHTML += `<div class="info-chip">${item}</div>`;
+                });
+            } else {
+                container.innerHTML = '<span style="color: #94a3b8; font-style: italic; font-size: 0.9rem;">No specific recommendations.</span>';
+            }
+        }
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorBox.style.display = 'block';
+        }
+
+        function hideError() {
+            errorBox.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

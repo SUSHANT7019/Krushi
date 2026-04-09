@@ -1,0 +1,102 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Review Management</h2>
+    <div style="display: flex; gap: 10px;">
+        <form method="GET" style="display: flex; gap: 5px;">
+            <input type="text" name="search" value="{{ search_query }}" class="form-control" 
+                   placeholder="Search reviews..." style="margin-bottom: 0; padding: 6px 12px; width: 250px;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Product Reviews</h3>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>User</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr>
+                    <td><strong>{{ review.product.name }}</strong></td>
+                    <td><span class="badge badge-info">{{ review.user.username }}</span></td>
+                    <td style="color: var(--warning);">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td><small>{{ review.comment|truncatechars:100 }}</small></td>
+                    <td>{{ review.created_at|date:"d M Y" }}</td>
+                    <td>
+                        {% if review.is_active %}
+                            <span class="badge badge-success">Visible</span>
+                        {% else %}
+                            <span class="badge badge-danger">Hidden</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 5px;">
+                            <form action="{% url 'admin_review_toggle' review.id %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn {% if review.is_active %}btn-warning{% else %}btn-success{% endif %}" 
+                                        style="padding: 5px 10px;" title="{% if review.is_active %}Hide{% else %}Show{% endif %}">
+                                    <i class="fas {% if review.is_active %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
+                                </button>
+                            </form>
+                            <form action="{% url 'admin_review_delete' review.id %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" 
+                                        onclick="return confirm('Are you sure you want to delete this review?')"
+                                        style="padding: 5px 10px;" title="Delete Review">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 30px;">No reviews found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div style="padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: center;">
+        <div style="display: flex; gap: 5px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="btn" style="background-color: var(--secondary-color); color: var(--text-main);">&laquo;</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn" style="background-color: var(--secondary-color); color: var(--text-main);">&lsaquo;</a>
+            {% endif %}
+
+            <span class="btn" style="background-color: var(--primary-color); color: white;">{{ page_obj.number }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn" style="background-color: var(--secondary-color); color: var(--text-main);">&rsaquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn" style="background-color: var(--secondary-color); color: var(--text-main);">&raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% load static %}
+<link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+<!-- Chat Toggle Button -->
+<div id="chat-toggle-wrapper">
+    <button id="chat-toggle" title="Chat with KrushiBot">
+        <div class="toggle-icon-container">
+            <img class="chatbot-logo" src="{% static 'images/krushi-chatbot-logo.png' %}" alt="Krushi Chatbot" />
+            <div class="online-pulse"></div>
+        </div>
+    </button>
+    <div class="toggle-tooltip">Need help? Ask KrushiBot!</div>
+</div>
+
+<!-- Chat Container -->
+<div id="chat-container" class="hidden">
+    <!-- Premium Header -->
+    <div class="chat-header">
+        <div class="bot-profile">
+            <div class="bot-avatar-container">
+                <img src="{% static 'images/krushi-chatbot-logo.png' %}" alt="Bot" class="header-avatar">
+                <span class="active-indicator"></span>
+            </div>
+            <div class="bot-info">
+                <h3 class="bot-name">KrushiBot <span class="badge">AI</span></h3>
+                <p class="bot-status">Your Farming Expert • Online</p>
+            </div>
+        </div>
+        <div class="chat-header-actions">
+            <button id="close-chat" class="control-btn" title="Minimize">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div id="chat-messages" aria-live="polite">
+        <div class="welcome-card">
+            <div class="welcome-icon">🌱</div>
+            <h4>Welcome to Krushi!</h4>
+            <p>I'm your KrushiBot. How can I help with your farming needs today?</p>
+        </div>
+    </div>
+
+    <!-- Quick Suggestions -->
+    <div class="quick-suggestions">
+        <button class="suggestion-chip">How to grow tomatoes?</button>
+        <button class="suggestion-chip">Identify crop disease</button>
+        <button class="suggestion-chip">Check market prices</button>
+        <button class="suggestion-chip">Soil analysis tips</button>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-wrapper">
+        <div class="input-container-inner">
+            <input type="text" id="chat-input" placeholder="Ask me anything about farming..." autocomplete="off">
+            <button id="send-button" class="glow-on-hover" title="Send message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Load chat CSS and JS -->
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+<script src="{% static 'js/chat.js' %}"></script>
+
+<script>
+    // Add close button functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const closeButton = document.getElementById('close-chat');
+        const chatContainer = document.getElementById('chat-container');
+
+        if (closeButton && chatContainer) {
+            closeButton.addEventListener('click', function () {
+                chatContainer.classList.add('hidden');
+            });
+        }
+
+        // Add Escape key support to close chat
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !chatContainer.classList.contains('hidden')) {
+                chatContainer.classList.add('hidden');
+            }
+        });
+    });
+</script>

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Terms & Conditions - Krushi{% endblock %}
+
+{% block body_class %}page-terms{% endblock %}
+
+{% block content %}
+<section class="hero" style="min-height: 45vh; padding-top: 120px; background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=1600&q=80') center center/cover;">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Terms & Conditions</h1>
+            <p>The roadmap for using Krushi's digital agricultural services.</p>
+        </div>
+    </div>
+</section>
+
+<section class="legal-section">
+    <div class="container">
+        <div class="legal-header">
+            <p>Last Updated: April 10, 2026</p>
+        </div>
+
+        <div style="max-width: 900px; margin: 0 auto;">
+            <div class="legal-card">
+                <h2><i class="fas fa-handshake"></i> 1. Acceptance of Terms</h2>
+                <p>By using the Krushi website, you agree to follow these rules. We provide agricultural insights, e-commerce, and AI services for farmers and agricultural professionals.</p>
+            </div>
+
+            <div class="legal-card">
+                <h2><i class="fas fa-robot"></i> 2. AI Services Usage</h2>
+                <p>Features like <strong>Disease Detection</strong> and <strong>Soil Analysis</strong> are powered by AI models. These are intended for assistance only and should not replace professional consultation for critical agricultural decisions.</p>
+            </div>
+
+            <div class="legal-card">
+                <h2><i class="fas fa-shopping-basket"></i> 3. E-commerce & Payments</h2>
+                <p>All listings for fertilizers, seeds, and equipment are subject to availability. Payments are processed securely via Razorpay. Users must provide accurate billing and shipping information.</p>
+            </div>
+
+            <div class="legal-card">
+                <h2><i class="fas fa-user-lock"></i> 4. User Accounts</h2>
+                <p>You are responsible for keeping your account details secret. Krushi reserves the right to suspend accounts that violate safety protocols or misrepresent information.</p>
+            </div>
+
+            <div class="legal-card">
+                <h2><i class="fas fa-copyright"></i> 5. Intellectual Property</h2>
+                <p>The code, designs, and content on Krushi are property of KrushiPro. You may use them for personal farming needs but cannot redistribute them for commercial gain without permission.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

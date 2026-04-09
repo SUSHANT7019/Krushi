@@ -1,0 +1,168 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Approved - Krushi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background: #2E7D32;
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: #28a745;
+            color: #fff;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .product-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .product-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .product-details h3 {
+            margin: 0 0 10px 0;
+            color: #1e293b;
+        }
+
+        .product-details p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .footer {
+            background: #1e293b;
+            color: #94a3b8;
+            padding: 30px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #2E7D32;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .product-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Krushi</h1>
+            <p>Empowering Farmers, Enriching Lives</p>
+        </div>
+
+        <div class="content">
+            <div class="status-badge">Approved & Live</div>
+
+            <h2 style="color: #1e293b; margin-top: 0;">Great news, {{ user.first_name|default:user.username }}!</h2>
+            <p>Your product has been approved by our team and is now live on the Krushi Shop! Customers can now find and
+                purchase your item.</p>
+
+            <div class="product-card">
+                {% if product.image %}
+                <img src="{{ site_url }}{{ product.image.url }}" class="product-image" alt="{{ product.name }}">
+                {% else %}
+                <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 40px; color: #ccc;">📦</span>
+                </div>
+                {% endif %}
+                <div class="product-details">
+                    <h3>{{ product.name }}</h3>
+                    <p>Category: <b>{{ product.category.name }}</b></p>
+                    <p>Price: <b>₹{{ product.price }}</b></p>
+                    <p>Visibility: <b style="color: #28a745;">Live in Shop</b></p>
+                </div>
+            </div>
+
+            <p>We wish you the best of luck with your sales! You can monitor your orders and update your stock quantity
+                at any time via your dashboard.</p>
+
+            <div style="text-align: center;">
+                <a href="{{ site_url }}/shop/" class="btn">View in Shop</a>
+            </div>
+
+            <p style="margin-top: 40px; font-size: 14px; color: #64748b; text-align: center;">
+                Happy Selling on Krushi !
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 Krushi . All rights reserved.</p>
+            <p>Empowering Indian Farmers with Technology</p>
+        </div>
+    </div>
+</body>
+
+</html>

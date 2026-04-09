@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Privacy Policy - Krushi{% endblock %}
+
+{% block body_class %}page-privacy{% endblock %}
+
+{% block content %}
+<section class="hero" style="min-height: 45vh; padding-top: 120px; background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1600&q=80') center center/cover;">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Privacy Policy</h1>
+            <p>Your trust is our priority. Learn how Krushi protects your agricultural data.</p>
+        </div>
+    </div>
+</section>
+
+<section class="legal-section">
+    <div class="container">
+        <div class="legal-header">
+            <p>Last Updated: April 10, 2026</p>
+        </div>
+        
+        <div style="max-width: 900px; margin: 0 auto;">
+            <div class="legal-card">
+                <h2><i class="fas fa-database"></i> 1. Information We Collect</h2>
+                <p>At Krushi, we collect information to provide better services to our users. This includes:</p>
+                <ul style="list-style: none; margin-top: 15px;">
+                    <li style="margin-bottom: 15px;"><i class="fas fa-check-circle" style="color: var(--primary-color); margin-right: 10px;"></i> <strong>Account Information:</strong> Name, email, and phone number for registration.</li>
+                    <li style="margin-bottom: 15px;"><i class="fas fa-check-circle" style="color: var(--primary-color); margin-right: 10px;"></i> <strong>Agricultural Data:</strong> Location data for weather and images uploaded for crop disease detection.</li>
+                    <li style="margin-bottom: 15px;"><i class="fas fa-check-circle" style="color: var(--primary-color); margin-right: 10px;"></i> <strong>Transaction Data:</strong> Secure processing of your orders via Razorpay.</li>
+                </ul>
+            </div>
+
+            <div class="legal-card">
+                <h2><i class="fas fa-shield-alt"></i> 2. How We Use and Protect Data</h2>
+                <p>We use your information to provide AI-driven insights, process transactions, and improve site performance. Your data is encrypted via SSL and stored on secure servers.</p>
+                <p style="margin-top: 15px;">We do not sell your personal data to third parties. AI processing (like image analysis via Gemini) is done under strict privacy guidelines.</p>
+            </div>
+
+            <div class="legal-card">
+                <h2><i class="fas fa-cookie-bite"></i> 3. Cookies</h2>
+                <p>We use essential cookies to maintain your session and preference cookies for features like Google Translate. You can manage cookie settings in your browser at any time.</p>
+            </div>
+
+            <div class="legal-card">
+                <h2><i class="fas fa-envelope-open-text"></i> 4. Contact Us</h2>
+                <p>Have questions about your privacy? Reach out to our dedicated support team:</p>
+                <div style="background: #f9fff9; padding: 25px; border-radius: 12px; border: 1px dashed var(--primary-color); margin-top: 20px;">
+                    <p style="margin-bottom: 8px;"><strong>Email:</strong> <a href="mailto:privacy@krushipro.com">privacy@krushipro.com</a></p>
+                    <p><strong>Support:</strong> Rukmini Krushi Kendra, Maharashtra, India</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
