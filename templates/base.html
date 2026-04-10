@@ -3,6 +3,17 @@
 <html lang="en">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3XD0KR54NH"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-3XD0KR54NH');
+    </script>
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -317,7 +328,7 @@
             // Global Form Submit Optimization (Authentication Flow)
             const authForms = document.querySelectorAll('.auth-form form');
             authForms.forEach(form => {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     // Note: Don't prevent default, just update UI
                     if (this.checkValidity()) {
                         const submitBtn = this.querySelector('button[type="submit"]');
