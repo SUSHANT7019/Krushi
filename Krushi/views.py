@@ -786,74 +786,96 @@ def rating(request):
     }
     return render(request, 'rating.html', context)
 def login_view(request):
-    """User login view"""
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        form = CustomAuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            
-            # Try to authenticate with username
-            user = authenticate(username=username, password=password)
-            if user is None:
-                # Try to authenticate with email
-                try:
-                    user_obj = User.objects.get(email=username)
-                    user = authenticate(username=user_obj.username, password=password)
-                except User.DoesNotExist:
-                    pass
-            
-            if user is not None:
-                login(request, user)
-                next_url = request.GET.get('next', 'home')
-                return redirect(next_url)
-            else:
-                # Optional: Add an error message if login fails entirely
-                messages.error(request, "Invalid username or password.  ")
-    else:
-        form = CustomAuthenticationForm()
-    
-    context = {'form': form}
-    return render(request, 'login.html', context)
+    """User login view with error logging for production 500 debugging"""
+    try:
+        if request.user.is_authenticated:
+            return redirect('home')
+        
+        # Defensive check for Site object (common allauth 500 error on first request)
+        from django.contrib.sites.models import Site
+        try:
+            Site.objects.get_current(request)
+        except Exception as site_err:
+            logger.error(f"Site lookup failed on first load: {site_err}", exc_info=True)
+            # We don't crash here, allauth tags might still fail later but we'll have a log
+        
+        if request.method == 'POST':
+            form = CustomAuthenticationForm(request, data=request.POST)
+            if form.is_valid():
+                username = form.cleaned_data.get('username')
+                password = form.cleaned_data.get('password')
+                
+                # The form already authenticated the user in clean(), but we re-verify for the login call
+                # Try to authenticate with username
+                user = authenticate(username=username, password=password)
+                if user is None:
+                    # Try to authenticate with email
+                    from django.core.exceptions import MultipleObjectsReturned
+                    try:
+                        user_obj = User.objects.get(email=username)
+                        user = authenticate(username=user_obj.username, password=password)
+                    except (User.DoesNotExist, MultipleObjectsReturned):
+                        pass
+                
+                if user is not None:
+                    login(request, user)
+                    next_url = request.GET.get('next', 'home')
+                    # Basic security check for next_url: only allow relative paths
+                    if not next_url.startswith('/'):
+                        next_url = 'home'
+                    return redirect(next_url)
+                else:
+                    messages.error(request, "Authentication failed. Please check your credentials.")
+        else:
+            form = CustomAuthenticationForm()
+        
+        context = {'form': form}
+        return render(request, 'login.html', context)
+    except Exception as e:
+        logger.error(f"CRITICAL: 500 error in login_view: {str(e)}", exc_info=True)
+        # Re-raise to show the standard 500 page but ensure it's logged
+        raise
 
 def register(request):
     """User registration view with OTP verification step"""
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            if username and User.objects.filter(username=username).exists():
-                form.add_error('username', 'This username is already taken. Please choose another one.')
-            else:
-                try:
-                    # Create user as inactive
-                    user = form.save(commit=False)
-                    user.is_active = False
-                    user.save()
-                    
-                    # Generate and send OTP
-                    otp = generate_registration_otp(user)
-                    send_registration_otp_email(user, otp)
-                    
-                    # Store user ID in session for verification page
-                    request.session['registration_user_id'] = user.id
-                    messages.success(request, f'An OTP has been sent to {user.email}. Please verify to activate your account.')
-                    return redirect('verify_registration_otp')
-                    
-                except Exception as e:
-                    logger.error(f"Registration error: {e}")
-                    form.add_error(None, 'Unable to create account right now. Please try again.')
-    else:
-        form = CustomUserCreationForm()
-    
-    context = {'form': form}
-    return render(request, 'register.html', context)
+    try:
+        if request.user.is_authenticated:
+            return redirect('home')
+        
+        if request.method == 'POST':
+            form = CustomUserCreationForm(request.POST)
+            if form.is_valid():
+                username = form.cleaned_data.get('username')
+                if username and User.objects.filter(username=username).exists():
+                    form.add_error('username', 'This username is already taken. Please choose another one.')
+                else:
+                    try:
+                        # Create user as inactive
+                        user = form.save(commit=False)
+                        user.is_active = False
+                        user.save()
+                        
+                        # Generate and send OTP
+                        from .views import generate_registration_otp, send_registration_otp_email
+                        otp = generate_registration_otp(user)
+                        send_registration_otp_email(user, otp)
+                        
+                        # Store user ID in session for verification page
+                        request.session['registration_user_id'] = user.id
+                        messages.success(request, f'An OTP has been sent to {user.email}. Please verify to activate your account.')
+                        return redirect('verify_registration_otp')
+                        
+                    except Exception as e:
+                        logger.error(f"Registration error: {e}", exc_info=True)
+                        form.add_error(None, 'Unable to create account right now. Please try again.')
+        else:
+            form = CustomUserCreationForm()
+        
+        context = {'form': form}
+        return render(request, 'register.html', context)
+    except Exception as e:
+        logger.error(f"CRITICAL: 500 error in register view: {str(e)}", exc_info=True)
+        raise
 
 def verify_registration_otp(request):
     """View to handle OTP entry and verification during signup"""
@@ -989,11 +1011,17 @@ def update_cart(request, item_id):
             cart_item = CartItem.objects.get(id=item_id, cart__user=request.user)
             quantity = int(request.POST.get('quantity', 1))
             
-            if quantity > 0:
-                cart_item.quantity = quantity
-                cart_item.save()
-            else:
-                cart_item.delete()
+            # Enforce minimum quantity of 1
+            if quantity < 1:
+                quantity = 1
+                
+            # Check against stock
+            product_stock = cart_item.product.stock_quantity
+            if quantity > product_stock:
+                quantity = product_stock
+                
+            cart_item.quantity = quantity
+            cart_item.save()
             
             return JsonResponse({'success': True})
         except CartItem.DoesNotExist:
@@ -1094,59 +1122,54 @@ def checkout(request):
 
             # ── Duplicate protection (idempotency token) ──
             idempotency_key = request.POST.get('idempotency_key', '').strip()
+            order = None
             if idempotency_key:
-                existing = Order.objects.filter(
+                order = Order.objects.filter(
                     user=request.user,
                     idempotency_key=idempotency_key,
                 ).exclude(status='cancelled').first()
-                if existing:
-                    # Return the existing order instead of creating a duplicate
-                    if existing.is_cod:
-                        return JsonResponse({'success': True, 'payment_method': 'cod', 'order_id': existing.id})
-                    else:
-                        return JsonResponse({
-                            'success': True,
-                            'payment_method': 'razorpay',
-                            'razorpay_order_id': existing.razorpay_order_id,
-                            'amount': int(existing.total_amount * 100),
-                            'currency': existing.currency,
-                            'key_id': settings.RAZORPAY_KEY_ID,
-                            'order_id': existing.id,
-                            'order_number': existing.order_number,
-                            'user': {
-                                'name': request.user.get_full_name() or request.user.username,
-                                'email': request.user.email,
-                                'contact': phone,
-                            },
-                        })
+                
+                if order:
+                    # Update billing/shipping info if it changed
+                    order.full_name = full_name
+                    order.shipping_address = shipping_address
+                    order.city = city
+                    order.district = district
+                    order.state = state
+                    order.pincode = pincode
+                    order.phone = phone
+                    order.notes = notes
+                    order.payment_method = payment_method
+                    order.save()
 
-            # ── Create local order ──
-            order = Order.objects.create(
-                user=request.user,
-                total_amount=total_amount,
-                currency='INR',
-                full_name=full_name,
-                shipping_address=shipping_address,
-                city=city,
-                district=district,
-                state=state,
-                pincode=pincode,
-                phone=phone,
-                notes=notes,
-                payment_method=payment_method,
-                idempotency_key=idempotency_key,
-                status='pending',
-                payment_status='pending',
-            )
-
-            # Create order items from cart
-            for ci in cart_items:
-                OrderItem.objects.create(
-                    order=order,
-                    product=ci.product,
-                    quantity=ci.quantity,
-                    price=ci.product.price,
+            if not order:
+                # ── Create local order ──
+                order = Order.objects.create(
+                    user=request.user,
+                    total_amount=total_amount,
+                    currency='INR',
+                    full_name=full_name,
+                    shipping_address=shipping_address,
+                    city=city,
+                    district=district,
+                    state=state,
+                    pincode=pincode,
+                    phone=phone,
+                    notes=notes,
+                    payment_method=payment_method,
+                    idempotency_key=idempotency_key,
+                    status='pending',
+                    payment_status='pending',
                 )
+
+                # Create order items from cart
+                for ci in cart_items:
+                    OrderItem.objects.create(
+                        order=order,
+                        product=ci.product,
+                        quantity=ci.quantity,
+                        price=ci.product.price,
+                    )
 
             # ── Branch by payment method ──
 
@@ -1302,6 +1325,16 @@ def payment_verify(request):
         'payment_status', 'status', 'paid_at',
     ])
 
+    # Deduct stock for online orders
+    try:
+        order_items = order.items.select_related('product').all()
+        for item in order_items:
+            product = item.product
+            product.stock_quantity = max(0, product.stock_quantity - item.quantity)
+            product.save(update_fields=['stock_quantity'])
+    except Exception as stock_err:
+        logger.error("Stock deduction failed for order %s: %s", order.order_number, stock_err)
+
     # Log transaction
     PaymentTransaction.objects.create(
         order=order,
@@ -1341,8 +1374,14 @@ def order_confirmation(request, order_id):
 
 @login_required
 def my_orders(request):
-    """User's order history"""
-    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    """User's order history.
+    Filter out online orders that were never paid (stuck in pending).
+    """
+    from django.db.models import Q
+    orders = Order.objects.filter(user=request.user).filter(
+        Q(payment_method='cod') | Q(payment_status='paid')
+    ).order_by('-created_at')
+    
     context = {'orders': orders}
     return render(request, 'my_orders.html', context)
 

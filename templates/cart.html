@@ -87,6 +87,23 @@
 {% block extra_js %}
 <script>
     function updateQuantity(itemId, quantity) {
+        quantity = parseInt(quantity);
+        const input = document.getElementById(`quantity-${itemId}`);
+        const minAttr = parseInt(input.getAttribute('min') || 1);
+        const maxAttr = parseInt(input.getAttribute('max') || 999);
+
+        if (isNaN(quantity) || quantity < minAttr) {
+            alert(`Minimum quantity is ${minAttr}`);
+            input.value = minAttr;
+            return;
+        }
+        
+        if (quantity > maxAttr) {
+            alert(`Only ${maxAttr} items available in stock`);
+            input.value = maxAttr;
+            return;
+        }
+
         fetch(`/update-cart/${itemId}/`, {
             method: 'POST',
             headers: {
@@ -98,9 +115,10 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    location.reload(); // Refresh to show updated totals
+                    location.reload(); 
                 } else {
                     alert('Error updating quantity: ' + data.message);
+                    location.reload();
                 }
             })
             .catch(error => {

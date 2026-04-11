@@ -81,10 +81,11 @@ class CustomAuthenticationForm(AuthenticationForm):
             user = authenticate(username=username, password=password)
             if user is None:
                 # Try to authenticate with email
+                from django.core.exceptions import MultipleObjectsReturned
                 try:
                     user_obj = User.objects.get(email=username)
                     user = authenticate(username=user_obj.username, password=password)
-                except User.DoesNotExist:
+                except (User.DoesNotExist, MultipleObjectsReturned):
                     pass
             
             if user is None:

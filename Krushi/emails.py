@@ -56,9 +56,9 @@ def send_order_status_email(order, status):
     try:
         from django.contrib.sites.models import Site
         site_domain = Site.objects.get_current().domain
-        site_url = f"http://{site_domain}" if '127.0.0.1' in site_domain or 'localhost' in site_domain else f"https://{site_domain}"
+        site_url = f"http://{site_domain}" 
     except Exception:
-        site_url = 'http://127.0.0.1:8000'
+        site_url = 'https://krushi.xyz'
     
     context = {
         'user': order.user,
