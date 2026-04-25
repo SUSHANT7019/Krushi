@@ -6,7 +6,7 @@ from .views_chat import chat_api
 urlpatterns = [
     path('', views.home, name='home'),
     path('health/', views.health_check, name='health_check'),
-    path('favicon.ico', RedirectView.as_view(url='/static/favicon.ico')),
+    path('favicon.ico', RedirectView.as_view(url='/static/images/favicon.ico')),
     path('shop/', views.shop, name='shop'),
     
     # Sell Products
